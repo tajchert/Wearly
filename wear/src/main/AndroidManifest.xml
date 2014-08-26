@@ -18,7 +18,7 @@
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" >
             <meta-data
                 android:name="com.google.android.clockwork.home.preview"
-                android:resource="@drawable/ic_launcher" />
+                android:resource="@drawable/preview" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.google.android.clockwork.home.category.HOME_BACKGROUND" />

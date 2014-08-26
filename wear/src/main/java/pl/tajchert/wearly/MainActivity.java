@@ -61,12 +61,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mTextViewOne = (TimelyView) findViewById(R.id.textViewTimelyOne);
-        mTextViewTwo = (TimelyView) findViewById(R.id.textViewTimelyTwo);
-        mTextViewThree = (TimelyView) findViewById(R.id.textViewTimelyThree);
-        mTextViewFour = (TimelyView) findViewById(R.id.textViewTimelyFour);
-        mTextViewFive = (TimelyViewSmall) findViewById(R.id.textViewTimelyFive);
-        mTextViewSix = (TimelyViewSmall) findViewById(R.id.textViewTimelySix);
+        setViewStuff();
 
         timeInfoReceiver.onReceive(this, registerReceiver(null, intentFilter));
         registerReceiver(timeInfoReceiver, intentFilter);
@@ -84,6 +79,15 @@ public class MainActivity extends Activity {
 
             }
         });*/
+    }
+
+    private void setViewStuff() {
+        mTextViewOne = (TimelyView) findViewById(R.id.textViewTimelyOne);
+        mTextViewTwo = (TimelyView) findViewById(R.id.textViewTimelyTwo);
+        mTextViewThree = (TimelyView) findViewById(R.id.textViewTimelyThree);
+        mTextViewFour = (TimelyView) findViewById(R.id.textViewTimelyFour);
+        mTextViewFive = (TimelyViewSmall) findViewById(R.id.textViewTimelyFive);
+        mTextViewSix = (TimelyViewSmall) findViewById(R.id.textViewTimelySix);
     }
 
     public BroadcastReceiver timeInfoReceiver = new BroadcastReceiver() {
@@ -157,16 +161,7 @@ public class MainActivity extends Activity {
     private void setTimeHour(){
         if (mTextViewOne != null && mTextViewTwo != null) {
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
-            if(hour < 10) {
-                objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, 0);
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
-                objectAnimatorFirst = mTextViewTwo.animate(prevHoursTwo, hour);
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
-                prevHoursOne = 0;
-                prevHoursTwo = hour;
-            } else {
+            if(hour >= 10) {
                 List<Integer> digits = digits(hour);
                 objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, digits.get(1));
                 objectAnimatorFirst.setDuration(DURATION);
@@ -176,6 +171,15 @@ public class MainActivity extends Activity {
                 objectAnimatorFirst.start();
                 prevHoursOne = digits.get(1);
                 prevHoursTwo = digits.get(0);
+            } else {
+                objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, 0);
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
+                objectAnimatorFirst = mTextViewTwo.animate(prevHoursTwo, hour);
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
+                prevHoursOne = 0;
+                prevHoursTwo = hour;
             }
         }
     }
