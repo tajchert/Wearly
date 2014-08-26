@@ -14,16 +14,16 @@ import com.nineoldandroids.util.Property;
 import pl.tajchert.wearly.timelytextview.animation.TimelyEvaluator;
 import pl.tajchert.wearly.timelytextview.model.NumberUtils;
 
-public class TimelyView extends View {
+public class TimelyViewSmall extends View {
     private static final float                           RATIO                   = 1f;
-    private static final Property<TimelyView, float[][]> CONTROL_POINTS_PROPERTY = new Property<TimelyView, float[][]>(float[][].class, "controlPoints") {
+    private static final Property<TimelyViewSmall, float[][]> CONTROL_POINTS_PROPERTY = new Property<TimelyViewSmall, float[][]>(float[][].class, "controlPoints") {
         @Override
-        public float[][] get(TimelyView object) {
+        public float[][] get(TimelyViewSmall object) {
             return object.getControlPoints();
         }
 
         @Override
-        public void set(TimelyView object, float[][] value) {
+        public void set(TimelyViewSmall object, float[][] value) {
             object.setControlPoints(value);
         }
     };
@@ -31,17 +31,17 @@ public class TimelyView extends View {
     private              Path                            mPath                   = null;
     private              float[][]                       controlPoints           = null;
 
-    public TimelyView(Context context) {
+    public TimelyViewSmall(Context context) {
         super(context);
         init();
     }
 
-    public TimelyView(Context context, AttributeSet attrs) {
+    public TimelyViewSmall(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public TimelyView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public TimelyViewSmall(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -89,8 +89,8 @@ public class TimelyView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int width = 85;
-        int height = 85;
+        int width = 35;
+        int height = 35;
         int widthWithoutPadding = width - getPaddingLeft() - getPaddingRight();
         int heigthWithoutPadding = height - getPaddingTop() - getPaddingBottom();
 
@@ -111,7 +111,7 @@ public class TimelyView extends View {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.WHITE);
-        mPaint.setStrokeWidth(5.0f);
+        mPaint.setStrokeWidth(4.0f);
         mPaint.setStyle(Paint.Style.STROKE);
         mPath = new Path();
     }

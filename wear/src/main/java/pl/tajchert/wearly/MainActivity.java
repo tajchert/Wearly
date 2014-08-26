@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 
 import com.nineoldandroids.animation.ObjectAnimator;
 
@@ -14,6 +16,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import pl.tajchert.wearly.timelytextview.TimelyView;
+import pl.tajchert.wearly.timelytextview.TimelyViewSmall;
 
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
@@ -25,13 +28,21 @@ public class MainActivity extends Activity {
         intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
     }
 
-    private volatile ObjectAnimator objectAnimator = null;
+
+    private volatile ObjectAnimator objectAnimatorFirst = null;
+    private volatile ObjectAnimator objectAnimatorSecond = null;
     private final static int DURATION = 2000;//in miliseconds
+    private final static int DURATION_SECONDS = 500;//in miliseconds
+
+    private Handler mHandler = new Handler();
+    private boolean isActive = true;
 
     private TimelyView mTextViewOne;
     private TimelyView mTextViewTwo;
     private TimelyView mTextViewThree;
     private TimelyView mTextViewFour;
+    private TimelyViewSmall mTextViewFive;
+    private TimelyViewSmall mTextViewSix;
 
     private Calendar calendar;
 
@@ -39,6 +50,8 @@ public class MainActivity extends Activity {
     private int prevHoursTwo = 0;
     private int prevMinOne = 0;
     private int prevMinTwo = 0;
+    private int prevSecOne = 0;
+    private int prevSecTwo = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +61,8 @@ public class MainActivity extends Activity {
         mTextViewTwo = (TimelyView) findViewById(R.id.textViewTimelyTwo);
         mTextViewThree = (TimelyView) findViewById(R.id.textViewTimelyThree);
         mTextViewFour = (TimelyView) findViewById(R.id.textViewTimelyFour);
+        mTextViewFive = (TimelyViewSmall) findViewById(R.id.textViewTimelyFive);
+        mTextViewSix = (TimelyViewSmall) findViewById(R.id.textViewTimelySix);
 
         timeInfoReceiver.onReceive(this, registerReceiver(null, intentFilter));
         registerReceiver(timeInfoReceiver, intentFilter);
@@ -81,64 +96,128 @@ public class MainActivity extends Activity {
         calendar = Calendar.getInstance();
         setTimeHour();
         setTimeMinutes();
+        if(mTextViewFive != null && mTextViewSix != null) {
+            mTextViewFive.setVisibility(View.VISIBLE);
+            mTextViewSix.setVisibility(View.VISIBLE);
+        }
+        isActive = true;
+        startSecondUpdate();
+    }
+
+    @Override
+    protected void onPause() {
+        isActive = false;
+        if(mTextViewFive != null && mTextViewSix != null) {
+            mTextViewFive.setVisibility(View.INVISIBLE);
+            mTextViewSix.setVisibility(View.INVISIBLE);
+        }
+        super.onPause();
+    }
+
+    private void startSecondUpdate(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isActive) {
+                    try {
+                        Thread.sleep(1000);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                setTimeSeconds();
+                            }
+                        });
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                    }
+                }
+            }
+        }).start();
     }
 
     private void setTimeHour(){
         if (mTextViewOne != null && mTextViewTwo != null) {
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             if(hour < 10) {
-                objectAnimator = mTextViewOne.animate(prevHoursOne, 0);
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
-                objectAnimator = mTextViewTwo.animate(prevHoursTwo, hour);
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
+                objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, 0);
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
+                objectAnimatorFirst = mTextViewTwo.animate(prevHoursTwo, hour);
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
                 prevHoursOne = 0;
                 prevHoursTwo = hour;
             } else {
                 List<Integer> digits = digits(hour);
-                objectAnimator = mTextViewOne.animate(prevHoursOne, digits.get(1));
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
-                objectAnimator = mTextViewTwo.animate(prevHoursTwo, digits.get(0));
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
+                objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, digits.get(1));
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
+                objectAnimatorFirst = mTextViewTwo.animate(prevHoursTwo, digits.get(0));
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
                 prevHoursOne = digits.get(1);
                 prevHoursTwo = digits.get(0);
             }
         }
     }
     private void setTimeMinutes(){
-        if (mTextViewOne != null && mTextViewTwo != null) {
+        if (mTextViewThree != null && mTextViewFour != null) {
             int minutes = calendar.get(Calendar.MINUTE);
             if(minutes < 10) {
-                objectAnimator = mTextViewThree.animate(prevMinOne, 0);
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
-                objectAnimator = mTextViewFour.animate(prevMinTwo, minutes);
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
+                objectAnimatorFirst = mTextViewThree.animate(prevMinOne, 0);
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
+                objectAnimatorFirst = mTextViewFour.animate(prevMinTwo, minutes);
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
                 prevMinOne = 0;
                 prevMinTwo = minutes;
             } else {
                 List<Integer> digits = digits(minutes);
-                objectAnimator = mTextViewThree.animate(prevMinOne, digits.get(1));
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
-                objectAnimator = mTextViewFour.animate(prevMinTwo, digits.get(0));
-                objectAnimator.setDuration(DURATION);
-                objectAnimator.start();
+                objectAnimatorFirst = mTextViewThree.animate(prevMinOne, digits.get(1));
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
+                objectAnimatorFirst = mTextViewFour.animate(prevMinTwo, digits.get(0));
+                objectAnimatorFirst.setDuration(DURATION);
+                objectAnimatorFirst.start();
                 prevMinOne = digits.get(1);
                 prevMinTwo = digits.get(0);
 
             }
         }
     }
-    List<Integer> digits(int i) {
+    private void setTimeSeconds(){
+        if (mTextViewFive != null && mTextViewSix != null) {
+            int seconds = Calendar.getInstance().get(Calendar.SECOND);
+            if(seconds < 10) {
+                objectAnimatorFirst = mTextViewFive.animate(prevSecOne, 0);
+                objectAnimatorSecond = mTextViewSix.animate(prevSecTwo, seconds);
+                prevSecOne = 0;
+                prevSecTwo = seconds;
+            } else {
+                List<Integer> digits = digits(seconds);
+                objectAnimatorFirst = mTextViewFive.animate(prevSecOne, digits.get(1));
+                objectAnimatorSecond = mTextViewSix.animate(prevSecTwo, digits.get(0));
+                prevSecOne = digits.get(1);
+                prevSecTwo = digits.get(0);
+            }
+            objectAnimatorFirst.setDuration(DURATION_SECONDS);
+            objectAnimatorFirst.start();
+            objectAnimatorSecond.setDuration(DURATION_SECONDS);
+            objectAnimatorSecond.start();
+        }
+    }
+
+    /**
+     * Split number into digits
+     * @param number
+     * @return digit array
+     */
+    List<Integer> digits(int number) {
         List<Integer> digits = new ArrayList<Integer>();
-        while(i > 0) {
-            digits.add(i % 10);
-            i /= 10;
+        while(number > 0) {
+            digits.add(number % 10);
+            number /= 10;
         }
         return digits;
     }
