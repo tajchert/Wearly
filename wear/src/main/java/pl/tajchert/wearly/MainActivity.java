@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,15 +41,12 @@ public class MainActivity extends Activity {
 
     private Calendar calendar;
 
-    private int prevHoursOne = 0;
-    private int prevHoursTwo = 0;
-    private int prevMinOne = 0;
-    private int prevMinTwo = 0;
-    private int prevSecOne = 0;
-    private int prevSecTwo = 0;
-
-    private AlphaAnimation fadeOut;
-    private AlphaAnimation fadeIn;
+    private int prevHoursOne = -1;
+    private int prevHoursTwo = -1;
+    private int prevMinOne = -1;
+    private int prevMinTwo = -1;
+    private int prevSecOne = -1;
+    private int prevSecTwo = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +56,6 @@ public class MainActivity extends Activity {
 
         timeInfoReceiver.onReceive(this, registerReceiver(null, intentFilter));
         registerReceiver(timeInfoReceiver, intentFilter);
-
-        fadeOut = new AlphaAnimation(1.0f, 0.0f);
-        fadeOut.setDuration(500);
-
-        fadeIn = new AlphaAnimation(0.0f, 1.0f);
-        fadeIn.setDuration(500);
 
         runner = new Runnable() {
             @Override
@@ -96,10 +86,15 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context arg0, Intent intent) {
             calendar = Calendar.getInstance();
-            if(calendar.get(Calendar.HOUR_OF_DAY) != Integer.parseInt(prevHoursOne + "" + prevHoursTwo)) {
+            try {
+                if(calendar.get(Calendar.HOUR_OF_DAY) != Integer.parseInt(prevHoursOne + "" + prevHoursTwo)) {
+                    setTimeHour();
+                }
+                if(calendar.get(Calendar.MINUTE) != Integer.parseInt(prevMinOne + "" + prevMinTwo)) {
+                    setTimeMinutes();
+                }
+            } catch (NumberFormatException e) {
                 setTimeHour();
-            }
-            if(calendar.get(Calendar.MINUTE) != Integer.parseInt(prevMinOne + "" + prevMinTwo)) {
                 setTimeMinutes();
             }
         }
@@ -113,13 +108,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        calendar = Calendar.getInstance();
+        uncollapseSeconds();
         isActive = true;
         if(mTextViewFive != null && mTextViewSix != null) {
-            if(fadeIn != null) {
-                mTextViewSix.startAnimation(fadeIn);
-                mTextViewFive.startAnimation(fadeIn);
-            }
             mTextViewFive.setVisibility(View.VISIBLE);
             mTextViewSix.setVisibility(View.VISIBLE);
             startSecondUpdate();
@@ -131,14 +122,16 @@ public class MainActivity extends Activity {
         isActive = false;
         mHandler.removeCallbacks(runner);
         if(mTextViewFive != null && mTextViewSix != null) {
-            if(fadeOut != null) {
-                mTextViewSix.startAnimation(fadeOut);
-                mTextViewFive.startAnimation(fadeOut);
-            }
             mTextViewFive.setVisibility(View.INVISIBLE);
             mTextViewSix.setVisibility(View.INVISIBLE);
         }
         super.onPause();
+    }
+
+    private void uncollapseSeconds(){
+        prevSecOne = -1;
+        prevSecTwo = -1;
+        setTimeSeconds();
     }
 
     private void startSecondUpdate(){
