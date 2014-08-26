@@ -88,9 +88,12 @@ public class TimelyView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         int width = 85;
         int height = 85;
+        if(MeasureSpec.getSize(heightMeasureSpec) < 260){
+            width = 75;
+            height = 75;
+        }
         int widthWithoutPadding = width - getPaddingLeft() - getPaddingRight();
         int heigthWithoutPadding = height - getPaddingTop() - getPaddingBottom();
 

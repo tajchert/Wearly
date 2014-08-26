@@ -91,6 +91,10 @@ public class TimelyViewSmall extends View {
 
         int width = 35;
         int height = 35;
+        if(MeasureSpec.getSize(heightMeasureSpec) < 260){
+            width = 33;
+            height = 33;
+        }
         int widthWithoutPadding = width - getPaddingLeft() - getPaddingRight();
         int heigthWithoutPadding = height - getPaddingTop() - getPaddingBottom();
 
