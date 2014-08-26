@@ -10,8 +10,6 @@ import android.os.Handler;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 
-import com.nineoldandroids.animation.ObjectAnimator;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -28,15 +26,12 @@ public class MainActivity extends Activity {
         intentFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         intentFilter.addAction(Intent.ACTION_TIME_CHANGED);
     }
-
-
-    private volatile ObjectAnimator objectAnimatorFirst = null;
-    private volatile ObjectAnimator objectAnimatorSecond = null;
     private final static int DURATION = 2000;//in miliseconds
-    private final static int DURATION_SECONDS = 500;//in miliseconds
+    private final static int DURATION_SECONDS = 300;//in miliseconds
 
     private Handler mHandler = new Handler();
     private boolean isActive = true;
+    private Runnable runner;
 
     private TimelyView mTextViewOne;
     private TimelyView mTextViewTwo;
@@ -72,6 +67,13 @@ public class MainActivity extends Activity {
         fadeIn = new AlphaAnimation(0.0f, 1.0f);
         fadeIn.setDuration(500);
 
+        runner = new Runnable() {
+            @Override
+            public void run() {
+                setTimeSeconds();
+            }
+        };
+
         /*final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);//TODO use it
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -94,8 +96,12 @@ public class MainActivity extends Activity {
         @Override
         public void onReceive(Context arg0, Intent intent) {
             calendar = Calendar.getInstance();
-            setTimeHour();
-            setTimeMinutes();
+            if(calendar.get(Calendar.HOUR_OF_DAY) != Integer.parseInt(prevHoursOne + "" + prevHoursTwo)) {
+                setTimeHour();
+            }
+            if(calendar.get(Calendar.MINUTE) != Integer.parseInt(prevMinOne + "" + prevMinTwo)) {
+                setTimeMinutes();
+            }
         }
     };
     @Override
@@ -108,8 +114,6 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         calendar = Calendar.getInstance();
-        setTimeHour();
-        setTimeMinutes();
         isActive = true;
         if(mTextViewFive != null && mTextViewSix != null) {
             if(fadeIn != null) {
@@ -120,12 +124,12 @@ public class MainActivity extends Activity {
             mTextViewSix.setVisibility(View.VISIBLE);
             startSecondUpdate();
         }
-
     }
 
     @Override
     protected void onPause() {
         isActive = false;
+        mHandler.removeCallbacks(runner);
         if(mTextViewFive != null && mTextViewSix != null) {
             if(fadeOut != null) {
                 mTextViewSix.startAnimation(fadeOut);
@@ -144,12 +148,7 @@ public class MainActivity extends Activity {
                 while (isActive) {
                     try {
                         Thread.sleep(1000);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                setTimeSeconds();
-                            }
-                        });
+                        mHandler.post(runner);
                     } catch (Exception e) {
                         // TODO: handle exception
                     }
@@ -163,21 +162,13 @@ public class MainActivity extends Activity {
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
             if(hour >= 10) {
                 List<Integer> digits = digits(hour);
-                objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, digits.get(1));
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
-                objectAnimatorFirst = mTextViewTwo.animate(prevHoursTwo, digits.get(0));
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
+                mTextViewOne.animate(prevHoursOne, digits.get(1)).setDuration(DURATION).start();
+                mTextViewTwo.animate(prevHoursTwo, digits.get(0)).setDuration(DURATION).start();
                 prevHoursOne = digits.get(1);
                 prevHoursTwo = digits.get(0);
             } else {
-                objectAnimatorFirst = mTextViewOne.animate(prevHoursOne, 0);
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
-                objectAnimatorFirst = mTextViewTwo.animate(prevHoursTwo, hour);
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
+                mTextViewOne.animate(prevHoursOne, 0).setDuration(DURATION).start();
+                mTextViewTwo.animate(prevHoursTwo, hour).setDuration(DURATION).start();
                 prevHoursOne = 0;
                 prevHoursTwo = hour;
             }
@@ -187,22 +178,14 @@ public class MainActivity extends Activity {
         if (mTextViewThree != null && mTextViewFour != null) {
             int minutes = calendar.get(Calendar.MINUTE);
             if(minutes < 10) {
-                objectAnimatorFirst = mTextViewThree.animate(prevMinOne, 0);
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
-                objectAnimatorFirst = mTextViewFour.animate(prevMinTwo, minutes);
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
+                mTextViewThree.animate(prevMinOne, 0).setDuration(DURATION).start();
+                mTextViewFour.animate(prevMinTwo, minutes).setDuration(DURATION).start();
                 prevMinOne = 0;
                 prevMinTwo = minutes;
             } else {
                 List<Integer> digits = digits(minutes);
-                objectAnimatorFirst = mTextViewThree.animate(prevMinOne, digits.get(1));
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
-                objectAnimatorFirst = mTextViewFour.animate(prevMinTwo, digits.get(0));
-                objectAnimatorFirst.setDuration(DURATION);
-                objectAnimatorFirst.start();
+                mTextViewThree.animate(prevMinOne, digits.get(1)).setDuration(DURATION).start();
+                mTextViewFour.animate(prevMinTwo, digits.get(0)).setDuration(DURATION).start();
                 prevMinOne = digits.get(1);
                 prevMinTwo = digits.get(0);
 
@@ -213,21 +196,17 @@ public class MainActivity extends Activity {
         if (mTextViewFive != null && mTextViewSix != null) {
             int seconds = Calendar.getInstance().get(Calendar.SECOND);
             if(seconds < 10) {
-                objectAnimatorFirst = mTextViewFive.animate(prevSecOne, 0);
-                objectAnimatorSecond = mTextViewSix.animate(prevSecTwo, seconds);
+                mTextViewFive.animate(prevSecOne, 0).setDuration(DURATION_SECONDS).start();
+                mTextViewSix.animate(prevSecTwo, seconds).setDuration(DURATION_SECONDS).start();
                 prevSecOne = 0;
                 prevSecTwo = seconds;
             } else {
                 List<Integer> digits = digits(seconds);
-                objectAnimatorFirst = mTextViewFive.animate(prevSecOne, digits.get(1));
-                objectAnimatorSecond = mTextViewSix.animate(prevSecTwo, digits.get(0));
+                mTextViewFive.animate(prevSecOne, digits.get(1)).setDuration(DURATION_SECONDS).start();
+                mTextViewSix.animate(prevSecTwo, digits.get(0)).setDuration(DURATION_SECONDS).start();
                 prevSecOne = digits.get(1);
                 prevSecTwo = digits.get(0);
             }
-            objectAnimatorFirst.setDuration(DURATION_SECONDS);
-            objectAnimatorFirst.start();
-            objectAnimatorSecond.setDuration(DURATION_SECONDS);
-            objectAnimatorSecond.start();
         }
     }
 
@@ -236,7 +215,7 @@ public class MainActivity extends Activity {
      * @param number
      * @return digit array
      */
-    List<Integer> digits(int number) {
+    private static List<Integer> digits(int number) {
         List<Integer> digits = new ArrayList<Integer>();
         while(number > 0) {
             digits.add(number % 10);
@@ -244,4 +223,5 @@ public class MainActivity extends Activity {
         }
         return digits;
     }
+
 }
