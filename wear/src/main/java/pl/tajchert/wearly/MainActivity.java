@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 
 import com.nineoldandroids.animation.ObjectAnimator;
 
@@ -53,6 +54,9 @@ public class MainActivity extends Activity {
     private int prevSecOne = 0;
     private int prevSecTwo = 0;
 
+    private AlphaAnimation fadeOut;
+    private AlphaAnimation fadeIn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +70,12 @@ public class MainActivity extends Activity {
 
         timeInfoReceiver.onReceive(this, registerReceiver(null, intentFilter));
         registerReceiver(timeInfoReceiver, intentFilter);
+
+        fadeOut = new AlphaAnimation(1.0f, 0.0f);
+        fadeOut.setDuration(500);
+
+        fadeIn = new AlphaAnimation(0.0f, 1.0f);
+        fadeIn.setDuration(500);
 
         /*final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);//TODO use it
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
@@ -96,18 +106,27 @@ public class MainActivity extends Activity {
         calendar = Calendar.getInstance();
         setTimeHour();
         setTimeMinutes();
+        isActive = true;
         if(mTextViewFive != null && mTextViewSix != null) {
+            if(fadeIn != null) {
+                mTextViewSix.startAnimation(fadeIn);
+                mTextViewFive.startAnimation(fadeIn);
+            }
             mTextViewFive.setVisibility(View.VISIBLE);
             mTextViewSix.setVisibility(View.VISIBLE);
+            startSecondUpdate();
         }
-        isActive = true;
-        startSecondUpdate();
+
     }
 
     @Override
     protected void onPause() {
         isActive = false;
         if(mTextViewFive != null && mTextViewSix != null) {
+            if(fadeOut != null) {
+                mTextViewSix.startAnimation(fadeOut);
+                mTextViewFive.startAnimation(fadeOut);
+            }
             mTextViewFive.setVisibility(View.INVISIBLE);
             mTextViewSix.setVisibility(View.INVISIBLE);
         }
