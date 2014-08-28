@@ -12,7 +12,7 @@ public class Nine extends Figure {
             {0.497237569060773f, 0.994475138121547f}
     };
 
-    private static Nine INSTANCE = new Nine();
+    private static final Nine INSTANCE = new Nine();
 
     protected Nine() {
         super(POINTS);

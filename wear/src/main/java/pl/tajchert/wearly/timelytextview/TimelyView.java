@@ -95,9 +95,9 @@ public class TimelyView extends View {
             height = 75;
         }
         int widthWithoutPadding = width - getPaddingLeft() - getPaddingRight();
-        int heigthWithoutPadding = height - getPaddingTop() - getPaddingBottom();
+        int heightWithoutPadding = height - getPaddingTop() - getPaddingBottom();
 
-        int maxWidth = (int) (heigthWithoutPadding * RATIO);
+        int maxWidth = (int) (heightWithoutPadding * RATIO);
         int maxHeight = (int) (widthWithoutPadding / RATIO);
 
         if (widthWithoutPadding > maxWidth) {
